@@ -2617,7 +2617,91 @@ goto System_Menu
 
 :System_RegistryBackup
 cls
-echo [Full Registry Backup - Placeholder]
+echo Full Registry Backup...
+
+:: Setup paths and information
+set "BackupPath=C:\ProgramData\RegistryBackup"
+for /f "tokens=2 delims==" %%a in ('wmic OS Get localdatetime /value') do set "dt=%%a"
+set "DateTime=%dt:~0,4%-%dt:~4,2%-%dt:~6,2%_%dt:~8,2%-%dt:~10,2%-%dt:~12,2%"
+set "BackupFolder=%BackupPath%\Registry_Backup_%DateTime%"
+
+:: Create backup folder
+if not exist "%BackupPath%" (
+    mkdir "%BackupPath%"
+    echo Created main folder: %BackupPath%
+)
+
+mkdir "%BackupFolder%"
+if %errorLevel% neq 0 (
+    echo Error creating backup folder!
+    pause
+    exit /b
+)
+echo Created backup folder: %BackupFolder%
+
+echo.
+echo Starting registry backup process...
+echo.
+
+:: Backup HKEY_LOCAL_MACHINE
+echo Backing up HKEY_LOCAL_MACHINE...
+reg export "HKEY_LOCAL_MACHINE" "%BackupFolder%\HKLM.reg" /y >nul 2>&1
+if %errorLevel% equ 0 (
+    echo [32m✓ Successfully backed up HKEY_LOCAL_MACHINE[0m
+) else (
+    echo [31m✗ Failed to backup HKEY_LOCAL_MACHINE[0m
+)
+
+:: Backup HKEY_CURRENT_USER
+echo Backing up HKEY_CURRENT_USER...
+reg export "HKEY_CURRENT_USER" "%BackupFolder%\HKCU.reg" /y >nul 2>&1
+if %errorLevel% equ 0 (
+    echo [32m✓ Successfully backed up HKEY_CURRENT_USER[0m
+) else (
+    echo [31m✗ Failed to backup HKEY_CURRENT_USER[0m
+)
+
+:: Backup HKEY_USERS
+echo Backing up HKEY_USERS...
+reg export "HKEY_USERS" "%BackupFolder%\HKU.reg" /y >nul 2>&1
+if %errorLevel% equ 0 (
+    echo [32m✓ Successfully backed up HKEY_USERS[0m
+) else (
+    echo [31m✗ Failed to backup HKEY_USERS[0m
+)
+
+:: Backup HKEY_CLASSES_ROOT
+echo Backing up HKEY_CLASSES_ROOT...
+reg export "HKEY_CLASSES_ROOT" "%BackupFolder%\HKCR.reg" /y >nul 2>&1
+if %errorLevel% equ 0 (
+    echo [32m✓ Successfully backed up HKEY_CLASSES_ROOT[0m
+) else (
+    echo [31m✗ Failed to backup HKEY_CLASSES_ROOT[0m
+)
+
+:: Backup HKEY_CURRENT_CONFIG
+echo Backing up HKEY_CURRENT_CONFIG...
+reg export "HKEY_CURRENT_CONFIG" "%BackupFolder%\HKCC.reg" /y >nul 2>&1
+if %errorLevel% equ 0 (
+    echo [32m✓ Successfully backed up HKEY_CURRENT_CONFIG[0m
+) else (
+    echo [31m✗ Failed to backup HKEY_CURRENT_CONFIG[0m
+)
+
+echo.
+echo ==================================================
+echo Backup completed successfully!
+echo Path: %BackupFolder%
+echo ==================================================
+echo.
+
+:: Open backup folder (optional)
+set /p OpenFolder="Do you want to open the backup folder? (y/n): "
+if /i "%OpenFolder%"=="y" (
+    start explorer "%BackupFolder%"
+)
+
+echo.
 pause
 goto System_Menu
 
