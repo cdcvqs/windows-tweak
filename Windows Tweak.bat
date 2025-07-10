@@ -1,7 +1,7 @@
 @echo off
 title Tweak - Windows Optimization Tool
 setlocal enabledelayedexpansion
-mode con: cols=1 lines=35
+mode con: cols=120 lines=25
 
 :MENU
 cls
